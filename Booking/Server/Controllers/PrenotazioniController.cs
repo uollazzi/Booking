@@ -1,4 +1,5 @@
 ﻿using Booking.DataContext;
+using Booking.DataContext.Models;
 using Booking.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,38 +22,48 @@ namespace Booking.Server.Controllers
 
         [HttpPost("verifica")]
         public async Task<ActionResult<bool>> Verifica(VerificaDisponibilitaModel model)
+        {        
+            var struttura = await _dc.Strutture.AsNoTracking().SingleOrDefaultAsync(x => x.Id == model.StrutturaId);
+
+            if (struttura == null) return NotFound("Struttura non trovata");
+
+            try
+            {
+                return await GetStanzaDisponibile(model.StrutturaId, model.NumeroPosti, model.Dal, model.Al) != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return false;
+            }            
+        }
+
+        private async Task<Stanza?> GetStanzaDisponibile(int strutturaId, int numeroPosti, long dal_epoch, long al_epoch)
         {
-            var dal = DateTimeOffset.FromUnixTimeSeconds(model.Dal).LocalDateTime;
-            var al = DateTimeOffset.FromUnixTimeSeconds(model.Al).LocalDateTime;
+            var dal = DateTimeOffset.FromUnixTimeSeconds(dal_epoch).LocalDateTime;
+            var al = DateTimeOffset.FromUnixTimeSeconds(al_epoch).LocalDateTime;
 
             var struttura = await _dc.Strutture.AsNoTracking()
                                                .Include(x => x.Stanze!)
                                                .ThenInclude(x => x.Disponibilita!)
                                                .Include(x => x.Stanze!)
                                                .ThenInclude(x => x.Prenotazioni!)
-                                               .SingleOrDefaultAsync(x => x.Id == model.StrutturaId);
+                                               .SingleOrDefaultAsync(x => x.Id == strutturaId);
 
-            if (struttura == null) return NotFound("Struttura non trovata");
+            if (struttura == null) return null;
 
-            try
-            {
-                // cerco se ci sono stanze prenotabili nella struttura
-                // in base al periodo ed in base al numero di posti
-                var stanzePrenotabili = struttura.Stanze!
-                    .Where(x => x.Disponibilita!.Any(a => a.Dal <= dal && a.Al >= al) && x.Capienza >= model.NumeroPosti);
+            // cerco se ci sono stanze prenotabili nella struttura
+            // in base al periodo ed in base al numero di posti
+            var stanzePrenotabili = struttura.Stanze!
+                .Where(x => x.Capienza >= numeroPosti && 
+                            x.Disponibilita!.Any(disp => disp.Dal <= dal && disp.Al >= al));
 
-                // delle stanze di cui sopra
-                // ritorno la prima disponibile
-                // (cioè quella che ha tutte le prenotazioni che non si accavallano al periodo selezionato)
-                var stanza = stanzePrenotabili.FirstOrDefault(x => x.Prenotazioni!.All(x => x.Dal >= al || x.Al <= dal));
+            // delle stanze di cui sopra
+            // ritorno la prima disponibile
+            // (cioè quella che ha tutte le prenotazioni che non si accavallano al periodo selezionato)
+            var stanza = stanzePrenotabili.FirstOrDefault(stanza => stanza.Prenotazioni!.All(x => x.Dal >= al || x.Al <= dal));
 
-                return stanza != null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                return Problem(ex.Message);
-            }            
+            return stanza;
         }
     }
 }

@@ -27,29 +27,30 @@ namespace Booking.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<StrutturaModel>> Add(StrutturaDTO model)
+        public async Task<ActionResult<StrutturaModel>> Add(StrutturaDTO dto)
         {
-            var citta = await _dc.Citta.SingleOrDefaultAsync(x => x.Id == model.CittaId);
+            var citta = await _dc.Citta.SingleOrDefaultAsync(x => x.Id == dto.CittaId);
 
             if (citta == null) return NotFound("Città non trovata.");
 
             try
             {
+                // inserisco la struttura
                 var struttura = new Struttura
                 {
                     Citta = citta,
-                    Indirizzo = model.Indirizzo,
-                    Nome = model.Nome,
+                    Indirizzo = dto.Indirizzo,
+                    Nome = dto.Nome,
                     Stanze = new List<Stanza>()
                 };
                 _dc.Strutture.Add(struttura);
 
-                foreach (var s in model.Stanze)
+                foreach (var s in dto.Stanze)
                 {
                     struttura.Stanze.Add(new Stanza
                     {
                         Capienza = s.Capienza,
-                        CostoUnitario = s.Costo,
+                        CostoUnitario = s.CostoUnitario,
                         Disponibilita = s.Disponibilita.Select(d => new Disponibilita
                         {
                             Dal = DateTimeOffset.FromUnixTimeSeconds(d.Dal).LocalDateTime,
