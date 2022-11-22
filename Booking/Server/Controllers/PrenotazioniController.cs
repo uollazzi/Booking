@@ -11,7 +11,7 @@ namespace Booking.Server.Controllers
         [HttpPost("verifica")]
         public async Task<ActionResult<bool>> Verifica(VerificaDisponibilitaModel model)
         {
-            return Ok();
+            return true;
         }
     }
 }
