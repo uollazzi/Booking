@@ -20,6 +20,7 @@ Creiamo la nostrta versione di Booking.com
 - GET Tutte le strutture Strutture By CittaID
 - GET Struttura By ID
 - POST Verifica Disponibilita Prenotazione (dal, al, numeroposti, struttura)
+- POST Verifica Disponibilita Prenotazione EASY (dal, al, numeroposti, struttura) => verificato soltanto che non ci siano già prenotazioni per quella stanza nel periodo selezionato
 - POST Prenota
 
 ### ADMIN

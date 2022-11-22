@@ -1,8 +1,16 @@
+using Booking.DataContext;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+#region Database
+
+builder.Services.AddDbContext<BookingContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
+
+#endregion
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
