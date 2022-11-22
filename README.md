@@ -27,3 +27,13 @@ Creiamo la nostrta versione di Booking.com
 - GET Tutte le Prenotazioni
 - POST Creazione Citta
 - POST Creazione Struttura (comprese stanze e relative disponibilità)
+
+## BLAZOR CLIENT
+
+### USERS
+- OPTIONAL: Aggiornare bootstrap
+- Pagina Citta con elenco delle citta (compreso il numero di strutture presenti nella citta) del DB
+    - Voce di Menu
+    - Servizio per le chiamate API
+    - Componente CittaList
+    - Componente CittaPreview
