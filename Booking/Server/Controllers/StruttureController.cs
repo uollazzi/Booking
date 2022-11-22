@@ -65,7 +65,7 @@ namespace Booking.Server.Controllers
                 _logger.LogError(ex.Message);
             }
 
-            return new StrutturaModel();
+            return Ok();
         }
     }
 }
