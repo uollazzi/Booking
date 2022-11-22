@@ -9,7 +9,7 @@ namespace Booking.Server.Controllers
     public class CittaController : ControllerBase
     {
         [HttpGet]
-        public async Task<IEnumerable<CittaModel>> GetAll()
+        public async Task<ActionResult<IEnumerable<CittaModel>>> GetAll()
         {
             return new List<CittaModel>();
         }
